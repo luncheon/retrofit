@@ -413,7 +413,7 @@ final class RestMethodInfo {
     }
 
     if (requestType == RequestType.SIMPLE && !requestHasBody && gotBody) {
-      throw methodError("Non-body HTTP method cannot contain @Body or @TypedOutput.");
+//      throw methodError("Non-body HTTP method cannot contain @Body or @TypedOutput.");
     }
     if (requestType == RequestType.FORM_URL_ENCODED && !gotField) {
       throw methodError("Form-encoded method must contain at least one @Field.");
