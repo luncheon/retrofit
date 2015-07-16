@@ -28,23 +28,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import retrofit.client.Response;
-import retrofit.http.Body;
-import retrofit.http.EncodedPath;
-import retrofit.http.EncodedQuery;
-import retrofit.http.EncodedQueryMap;
-import retrofit.http.Field;
-import retrofit.http.FieldMap;
-import retrofit.http.FormUrlEncoded;
-import retrofit.http.Header;
-import retrofit.http.Headers;
-import retrofit.http.Multipart;
-import retrofit.http.Part;
-import retrofit.http.PartMap;
-import retrofit.http.Path;
-import retrofit.http.Query;
-import retrofit.http.QueryMap;
-import retrofit.http.Streaming;
-import retrofit.http.RestMethod;
+import retrofit.http.*;
 import rx.Observable;
 
 /** Request metadata about a service interface declaration. */
@@ -349,6 +333,8 @@ final class RestMethodInfo {
               throw parameterError(i, "@EncodedQueryMap parameter type must be Map.");
             }
 
+          } else if (methodAnnotationType == Queries.class) {
+            // Nothing to do.
           } else if (methodAnnotationType == Header.class) {
             // Nothing to do.
           } else if (methodAnnotationType == Field.class) {

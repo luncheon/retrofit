@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import retrofit.http.FieldMap;
 import retrofit.http.Part;
 import retrofit.http.PartMap;
 import retrofit.http.Path;
+import retrofit.http.Queries;
 import retrofit.http.Query;
 import retrofit.http.QueryMap;
 import retrofit.mime.FormUrlEncodedTypedOutput;
@@ -222,6 +224,38 @@ final class RequestBuilder implements RequestInterceptor.RequestFacade {
     }
   }
 
+  private static void getFields(Class<?> cls, ArrayList<java.lang.reflect.Field> fields) {
+    if (cls != Object.class) {
+      fields.addAll(Arrays.asList(cls.getDeclaredFields()));
+      getFields(cls.getSuperclass(), fields);
+    }
+  }
+
+  private static ArrayList<java.lang.reflect.Field> getFields(Object object) {
+    ArrayList<java.lang.reflect.Field> result = new ArrayList<java.lang.reflect.Field>();
+    if (object != null) {
+      getFields(object.getClass(), result);
+    }
+    return result;
+  }
+
+  private void addQueryParams(Object object, boolean encoded) {
+    for (java.lang.reflect.Field field : getFields(object)) {
+      boolean isAccessible = field.isAccessible();
+      field.setAccessible(true);
+      try {
+        Object value = field.get(object);
+        if (value != null) {
+          addQueryParam(field.getName(), value, !encoded, !encoded);
+        }
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } finally {
+        field.setAccessible(isAccessible);
+      }
+    }
+  }
+
   void setArguments(Object[] args) {
     if (args == null) {
       return;
@@ -269,6 +303,8 @@ final class RequestBuilder implements RequestInterceptor.RequestFacade {
         if (value != null) { // Skip null values.
           addQueryParamMap(i, (Map<?, ?>) value, false, false);
         }
+      } else if (annotationType == Queries.class) {
+        addQueryParams(value, ((Queries) annotation).encoded());
       } else if (annotationType == retrofit.http.Header.class) {
         if (value != null) { // Skip null values.
           String name = ((retrofit.http.Header) annotation).value();
